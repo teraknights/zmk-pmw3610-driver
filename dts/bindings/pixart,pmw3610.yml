@@ -22,3 +22,12 @@ properties:
   y-input-code:
     type: int
     required: true
+  scroll-layers:   # add teraknights
+    type: array
+    default: []
+  snipe-layers:
+    type: array
+    default: []
+  automouse-layer:
+    type: int
+    default: -1
