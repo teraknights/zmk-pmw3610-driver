@@ -395,8 +395,8 @@ static int pmw3610_report_data(const struct device *dev) {
 
 // teraknights add
 #if AUTOMOUSE_LAYER > 0
-    if (input_mode == MOVE &&
-         (automouse_triggered || zmk_keymap_highest_layer_active() != AUTOMOUSE_LAYER) &&
+//    if (input_mode == MOVE &&
+    if( (automouse_triggered || zmk_keymap_highest_layer_active() != AUTOMOUSE_LAYER) &&
             (abs(x) + abs(y) > CONFIG_PMW3610_MOVEMENT_THRESHOLD)
 ) {
     activate_automouse_layer();
