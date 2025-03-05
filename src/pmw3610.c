@@ -353,6 +353,27 @@ static void pmw3610_async_init(struct k_work *work) {
     }
 }
 
+//teraknights add
+#define AUTOMOUSE_LAYER (DT_PROP(DT_DRV_INST(0), automouse_layer))
+#if AUTOMOUSE_LAYER > 0
+struct k_timer automouse_layer_timer;
+static bool automouse_triggered = false;
+
+static void activate_automouse_layer() {
+    automouse_triggered = true;
+    zmk_keymap_layer_activate(AUTOMOUSE_LAYER);
+    k_timer_start(&automouse_layer_timer, K_MSEC(CONFIG_PMW3610_AUTOMOUSE_TIMEOUT_MS), K_NO_WAIT);
+}
+
+static void deactivate_automouse_layer(struct k_timer *timer) {
+    automouse_triggered = false;
+    zmk_keymap_layer_deactivate(AUTOMOUSE_LAYER);
+}
+
+K_TIMER_DEFINE(automouse_layer_timer, deactivate_automouse_layer, NULL);
+#endif
+//teraknights end
+
 static int pmw3610_report_data(const struct device *dev) {
     struct pixart_data *data = dev->data;
     const struct pixart_config *config = dev->config;
@@ -372,6 +393,16 @@ static int pmw3610_report_data(const struct device *dev) {
     int64_t now = k_uptime_get();
 #endif
 
+// teraknights add
+#if AUTOMOUSE_LAYER > 0
+    if (input_mode == MOVE &&
+         (automouse_triggered || zmk_keymap_highest_layer_active() != AUTOMOUSE_LAYER) &&
+            (abs(x) + abs(y) > CONFIG_PMW3610_MOVEMENT_THRESHOLD)
+) {
+    activate_automouse_layer();
+}
+#endif
+// teraknights end
 	int err = pmw3610_read(dev, PMW3610_REG_MOTION_BURST, buf, sizeof(buf));
     if (err) {
         return err;
